@@ -1,0 +1,96 @@
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+using PinePour.Api.Features.Auth;
+using PinePour.Api.Features.Feedback;
+using PinePour.Api.Features.Notifications;
+using PinePour.Api.Features.Locations;
+using PinePour.Api.Features.Menu;
+using PinePour.Api.Features.Orders;
+using PinePour.Api.Features.Payments;
+using PinePour.Api.Features.Reservations;
+using PinePour.Api.Features.Rewards;
+
+namespace PinePour.Api.Data;
+
+public class DataContext : IdentityDbContext<User, Role, int, IdentityUserClaim<int>, UserRole, IdentityUserLogin<int>, IdentityRoleClaim<int>, IdentityUserToken<int>>
+{
+    public DataContext(DbContextOptions<DataContext> options) : base(options)
+    {
+    }
+
+    public DbSet<Feedback> Feedbacks { get; set; }
+    public DbSet<Location> Locations { get; set; }
+    public DbSet<MenuItem> MenuItems { get; set; }
+    public DbSet<MenuCustomization> MenuCustomizations { get; set; }
+    public DbSet<Order> Orders { get; set; }
+    public DbSet<OrderItem> OrderItems { get; set; }
+    public DbSet<Payment> Payments { get; set; }
+    public DbSet<Reservation> Reservations { get; set; }
+    public DbSet<Reward> Rewards { get; set; }
+    public DbSet<RewardTier> RewardTiers { get; set; }
+    public DbSet<UserReward> UserRewards { get; set; }
+    public DbSet<Notification> Notifications { get; set; }
+    public DbSet<NotificationUserState> NotificationUserStates { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<MenuItem>()
+            .Property(x => x.Price)
+            .HasPrecision(18, 2);
+
+        modelBuilder.Entity<MenuCustomization>()
+            .Property(x => x.AdditionalPrice)
+            .HasPrecision(18, 2);
+
+        modelBuilder.Entity<Order>()
+            .Property(x => x.Total)
+            .HasPrecision(18, 2);
+
+        modelBuilder.Entity<OrderItem>()
+            .Property(x => x.UnitPrice)
+            .HasPrecision(18, 2);
+
+        modelBuilder.Entity<OrderItem>()
+            .Property(x => x.Total)
+            .HasPrecision(18, 2);
+
+        modelBuilder.Entity<Payment>()
+            .Property(x => x.Amount)
+            .HasPrecision(18, 2);
+
+        modelBuilder.Entity<Reward>()
+            .Property(x => x.DiscountAmount)
+            .HasPrecision(18, 2);
+
+        modelBuilder.Entity<MenuCustomization>()
+            .HasOne(x => x.MenuItem)
+            .WithMany(x => x.Customizations)
+            .HasForeignKey(x => x.MenuItemId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<OrderItem>()
+            .HasOne(x => x.Order)
+            .WithMany(x => x.Items)
+            .HasForeignKey(x => x.OrderId)
+            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<NotificationUserState>()
+            .HasKey(x => new { x.NotificationId, x.UserId });
+
+        modelBuilder.Entity<NotificationUserState>()
+            .HasOne<Notification>()
+            .WithMany()
+            .HasForeignKey(x => x.NotificationId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<NotificationUserState>()
+            .HasOne<User>()
+            .WithMany()
+            .HasForeignKey(x => x.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(DataContext).Assembly);
+    }
+}

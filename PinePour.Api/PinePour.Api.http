@@ -1,0 +1,39 @@
+@PinePour.Api_HostAddress = http://localhost:5169
+
+GET {{PinePour.Api_HostAddress}}/api/locations/
+Accept: application/json
+
+###
+
+GET {{PinePour.Api_HostAddress}}/api/locations/1
+Accept: application/json
+
+###
+
+POST {{PinePour.Api_HostAddress}}/api/locations/
+Content-Type: application/json
+
+{
+  "name": "New Location",
+  "address": "123 New St",
+  "tableCount": 5
+}
+
+###
+
+PUT {{PinePour.Api_HostAddress}}/api/locations/1
+Content-Type: application/json
+
+{
+  "id": 1,
+  "name": "Updated Location 1",
+  "address": "Updated Address",
+  "tableCount": 12
+}
+
+###
+
+DELETE {{PinePour.Api_HostAddress}}/api/locations/1
+Accept: application/json
+
+###

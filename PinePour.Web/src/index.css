@@ -1,0 +1,113 @@
+:root {
+  --font-sans: "Suisse Int'l", "Suisse Intl", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-display: "Freight Big Pro", "Freight Big", "Freight Display Pro", "Freight Display", Georgia, serif;
+  font-family: var(--font-sans);
+  line-height: 1.5;
+  font-weight: 400;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: #f6efcf;
+  background:
+    radial-gradient(circle at top left, rgba(221, 191, 113, 0.22), transparent 24%),
+    radial-gradient(circle at 100% 0%, rgba(118, 133, 38, 0.18), transparent 28%),
+    linear-gradient(180deg, #384210 0%, #1f2710 44%, #11170d 100%);
+  --panel: linear-gradient(180deg, rgba(65, 75, 22, 0.82), rgba(24, 31, 18, 0.96));
+  --border: rgba(246, 239, 207, 0.12);
+  --text-main: #f6efcf;
+  --text-soft: rgba(246, 239, 207, 0.84);
+  --text-muted: rgba(246, 239, 207, 0.62);
+  --shadow: 0 28px 64px rgba(12, 16, 8, 0.32);
+  --accent-gold: #d8bb74;
+  --accent-gold-light: #f3e4ad;
+  --accent-gold-deep: #ac8540;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  background: inherit;
+  color: var(--text-main);
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.68;
+}
+
+a {
+  color: inherit;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin-top: 0;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: 0.03em;
+}
+
+strong,
+b {
+  font-weight: 400;
+}
+
+::selection {
+  background: rgba(216, 187, 116, 0.3);
+}
+
+/* Light theme - warm cream/olive inversion */
+[data-theme="light"] {
+  color: #1c2108;
+  background:
+    radial-gradient(circle at top left, rgba(190, 205, 120, 0.16), transparent 26%),
+    radial-gradient(circle at 100% 0%, rgba(200, 175, 90, 0.12), transparent 28%),
+    linear-gradient(180deg, #f6f0e3 0%, #f0e9d8 50%, #e8e0cc 100%);
+  --panel: linear-gradient(180deg, rgba(255, 252, 245, 0.96), rgba(247, 241, 229, 0.98));
+  --border: rgba(56, 68, 10, 0.12);
+  --text-main: #1c2108;
+  --text-soft: rgba(28, 33, 8, 0.8);
+  --text-muted: rgba(28, 33, 8, 0.52);
+  --shadow: 0 16px 48px rgba(28, 33, 8, 0.1);
+  --accent-gold: #7c6818;
+  --accent-gold-light: #5a4e10;
+  --accent-gold-deep: #4a3e0c;
+}
+
+[data-theme="light"] body {
+  color: #1c2108;
+  background: inherit;
+}
+
+[data-theme="light"] ::selection {
+  background: rgba(120, 140, 20, 0.22);
+}
