@@ -2,15 +2,16 @@ name: pine-and-pour
 
 services:
   db:
-    image: mcr.microsoft.com/mssql/server:2022-latest
-    platform: linux/amd64
+    image: postgres:16-alpine
     environment:
-      ACCEPT_EULA: "Y"
-      MSSQL_SA_PASSWORD: "Password123!"
+      POSTGRES_DB: pinepour
+      POSTGRES_USER: postgres
+      # Required; set in your local `.env` (not committed)
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD not set}
     ports:
-      - "1433:1433"
+      - "5432:5432"
     volumes:
-      - sqlserver-data:/var/opt/mssql
+      - postgres-data:/var/lib/postgresql/data
 
   api:
     build:
@@ -22,9 +23,12 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_URLS: http://+:8080
-      ConnectionStrings__DataContext: Server=db,1433;Database=PinePour;User Id=sa;Password=Password123!;TrustServerCertificate=True
+      Database__Provider: Postgres
+      ConnectionStrings__DataContext: Host=db;Port=5432;Database=pinepour;Username=postgres;Password=${POSTGRES_PASSWORD}
       Spa__DevServerUrl: http://web:5173
       Stripe__SecretKey: ${STRIPE_SECRET_KEY:-}
+      Seed__EnableSampleData: ${SEED_ENABLE_SAMPLE_DATA:-false}
+      Seed__DefaultUserPassword: ${SEED_DEFAULT_USER_PASSWORD:-}
     ports:
       - "8080:8080"
 
@@ -39,4 +43,4 @@ services:
       - "5173:5173"
 
 volumes:
-  sqlserver-data:
+  postgres-data:

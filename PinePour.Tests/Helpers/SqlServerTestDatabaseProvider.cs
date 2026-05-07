@@ -7,6 +7,7 @@ public sealed class SqlServerTestDatabaseProvider
 {
     private const string DbPrefix = "PinePour-Test-";
     private static string? databaseName;
+    private const string SqlServerPasswordEnvVar = "MSSQL_SA_PASSWORD";
 
     public static void AssemblyInit()
     {
@@ -101,7 +102,14 @@ EXEC sp_MSForEachTable 'ENABLE TRIGGER ALL ON ?'
         string connection;
         if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            connection = $"Server=localhost,1433;Database={name};User Id=sa;Password=Password123!;TrustServerCertificate=True";
+            var password = Environment.GetEnvironmentVariable(SqlServerPasswordEnvVar);
+            if (string.IsNullOrWhiteSpace(password))
+            {
+                throw new InvalidOperationException(
+                    $"Missing env var {SqlServerPasswordEnvVar}. Set it before running tests that use SQL Server.");
+            }
+
+            connection = $"Server=localhost,1433;Database={name};User Id=sa;Password={password};TrustServerCertificate=True";
         }
         else
         {

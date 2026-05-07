@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using PinePour.Api.Features.Auth;
 using PinePour.Api.Features.Locations;
 using PinePour.Api.Features.Menu;
@@ -16,11 +17,19 @@ public static class SeedHelper
     public static async Task MigrateAndSeed(IServiceProvider serviceProvider)
     {
         var dataContext = serviceProvider.GetRequiredService<DataContext>();
+        var configuration = serviceProvider.GetRequiredService<IConfiguration>();
 
         await MigrateDatabase(dataContext);
 
         await AddRoles(serviceProvider);
-        await AddUsers(serviceProvider);
+
+        var enableSampleData = configuration.GetValue("Seed:EnableSampleData", false);
+        if (!enableSampleData)
+        {
+            return;
+        }
+
+        await AddUsers(serviceProvider, configuration);
         await AddLocations(dataContext);
         await AddMenuItems(dataContext);
         await AddRewards(dataContext);
@@ -54,9 +63,15 @@ public static class SeedHelper
         });
     }
 
-    private static async Task AddUsers(IServiceProvider serviceProvider)
+    private static async Task AddUsers(IServiceProvider serviceProvider, IConfiguration configuration)
     {
-        const string defaultPassword = "Password123!";
+        var defaultPassword = configuration["Seed:DefaultUserPassword"]?.Trim();
+        if (string.IsNullOrWhiteSpace(defaultPassword))
+        {
+            throw new InvalidOperationException(
+                "Seed:EnableSampleData is true, but Seed:DefaultUserPassword is not set. Set Seed__DefaultUserPassword as an environment variable.");
+        }
+
         var userManager = serviceProvider.GetRequiredService<UserManager<User>>();
 
         // Only seed galkadi, bob, sue

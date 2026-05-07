@@ -66,7 +66,7 @@ public class ApiBehaviorTests
         var userName = $"reset{Guid.NewGuid():N}";
         var email = $"{userName}@example.com";
         const string phone = "9855550100";
-        const string newPassword = "NewPassword123!";
+        var newPassword = $"NewPassword{Guid.NewGuid():N}!";
 
         var registerResponse = await webClient.PostAsJsonAsync("/api/authentication/register", new
         {

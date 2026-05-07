@@ -8,7 +8,9 @@ namespace PinePour.Tests.Controllers.Authentication;
 
 internal static class AuthenticationHelpers
 {
-    internal const string DefaultUserPassword = "Password123!";
+    internal static readonly string DefaultUserPassword =
+        Environment.GetEnvironmentVariable("PINEPOUR_TEST_DEFAULT_PASSWORD")
+        ?? throw new InvalidOperationException("Set PINEPOUR_TEST_DEFAULT_PASSWORD before running tests.");
 
     internal static async Task<UserDto?> RegisterAsync(
         this HttpClient webClient,

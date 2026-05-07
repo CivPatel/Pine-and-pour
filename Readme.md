@@ -13,13 +13,15 @@ The easiest way to run the project locally on macOS or Windows is Docker Compose
 
 This starts:
 
-- SQL Server
+- PostgreSQL
 - the ASP.NET API
 - the Vite web app
 
 From the repo root, run:
 
 ```bash
+cp .env.example .env
+# Set POSTGRES_PASSWORD in .env first
 docker compose up --build -d
 ```
 
@@ -40,11 +42,11 @@ Note: in the current `docker-compose.yml`, the `api` service depends on both `db
 
 ## 2. Run API without Docker
 
-If you prefer to run the API directly with `dotnet`, first make sure SQL Server is available on `localhost:1433`, then run:
+If you prefer to run the API directly with `dotnet`, set the environment variable `ConnectionStrings__DataContext` to your Postgres connection string (for Supabase on Render, use the Supabase **Session pooler** string), then run:
 
 ```bash
 cd PinePour.Api
-ConnectionStrings__DataContext="Server=localhost,1433;Database=PinePour;User Id=sa;Password=Password123!;TrustServerCertificate=True" dotnet run
+ConnectionStrings__DataContext="<your-postgres-connection-string>" dotnet run
 ```
 
 Then open:
