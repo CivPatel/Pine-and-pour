@@ -14,4 +14,5 @@ COPY --from=build /app/publish .
 
 EXPOSE 8080
 
-ENTRYPOINT ["dotnet", "PinePour.Api.dll"]
+# Render sets $PORT for web services. Default to 8080 for local Docker runs.
+ENTRYPOINT ["sh", "-c", "ASPNETCORE_URLS=http://0.0.0.0:${PORT:-8080} dotnet PinePour.Api.dll"]
