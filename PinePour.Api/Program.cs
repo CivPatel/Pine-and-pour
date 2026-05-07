@@ -8,6 +8,7 @@ using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 var spaDevServerUrl = builder.Configuration["Spa:DevServerUrl"] ?? "http://localhost:5173";
+var isDevelopment = builder.Environment.IsDevelopment();
 var isRunningInContainer = string.Equals(
     Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER"),
     "true",
@@ -40,9 +41,13 @@ builder.Services.AddDbContext<DataContext>(options =>
     throw new InvalidOperationException($"Unsupported Database:Provider '{databaseProvider}'.");
 });
 
-var configuredCorsOrigins = builder.Configuration
+var configuredCorsOrigins = (builder.Configuration
     .GetSection("Cors:AllowedOrigins")
-    .Get<string[]>() ?? Array.Empty<string>();
+    .Get<string[]>() ?? Array.Empty<string>())
+    .Where(origin => !string.IsNullOrWhiteSpace(origin))
+    .Select(origin => origin.Trim().TrimEnd('/'))
+    .ToArray();
+
 var allowedCorsOrigins = configuredCorsOrigins
     .Concat(new[]
     {
@@ -91,6 +96,16 @@ builder.Services.AddRateLimiter(options =>
 
 builder.Services.ConfigureApplicationCookie(options =>
 {
+    // Cross-origin cookie auth (Vercel/Expo -> Render API) requires:
+    // SameSite=None + Secure in production.
+    options.Cookie.HttpOnly = true;
+    options.Cookie.SecurePolicy = isDevelopment
+        ? CookieSecurePolicy.SameAsRequest
+        : CookieSecurePolicy.Always;
+    options.Cookie.SameSite = isDevelopment
+        ? SameSiteMode.Lax
+        : SameSiteMode.None;
+
     options.Events.OnRedirectToLogin = context =>
     {
         context.Response.StatusCode = 401;
