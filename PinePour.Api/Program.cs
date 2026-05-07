@@ -13,8 +13,32 @@ var isRunningInContainer = string.Equals(
     "true",
     StringComparison.OrdinalIgnoreCase);
 
+var databaseProvider = builder.Configuration["Database:Provider"] ?? "SqlServer";
+var connectionString = builder.Configuration.GetConnectionString("DataContext");
+if (string.IsNullOrWhiteSpace(connectionString))
+{
+    throw new InvalidOperationException(
+        "Missing database connection string. Set ConnectionStrings__DataContext as an environment variable.");
+}
+
 builder.Services.AddDbContext<DataContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DataContext")));
+{
+    if (databaseProvider.Equals("Postgres", StringComparison.OrdinalIgnoreCase)
+        || databaseProvider.Equals("PostgreSQL", StringComparison.OrdinalIgnoreCase))
+    {
+        options.UseNpgsql(PostgresConnectionStringNormalizer.Normalize(connectionString));
+        return;
+    }
+
+    if (databaseProvider.Equals("SqlServer", StringComparison.OrdinalIgnoreCase)
+        || databaseProvider.Equals("Sql", StringComparison.OrdinalIgnoreCase))
+    {
+        options.UseSqlServer(connectionString);
+        return;
+    }
+
+    throw new InvalidOperationException($"Unsupported Database:Provider '{databaseProvider}'.");
+});
 
 var configuredCorsOrigins = builder.Configuration
     .GetSection("Cors:AllowedOrigins")

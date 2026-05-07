@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using PinePour.Api.Features.Auth;
 using PinePour.Api.Features.Locations;
@@ -8,6 +7,7 @@ using PinePour.Api.Features.Orders;
 using PinePour.Api.Features.Payments;
 using PinePour.Api.Features.Notifications;
 using PinePour.Api.Features.Rewards;
+using System.Data.Common;
 
 namespace PinePour.Api.Data;
 
@@ -1137,13 +1137,29 @@ public static class SeedHelper
         {
             try
             {
+                var providerName = dataContext.Database.ProviderName ?? string.Empty;
+                var isPostgres = providerName.Contains("Npgsql", StringComparison.OrdinalIgnoreCase);
+
+                if (isPostgres)
+                {
+                    await dataContext.Database.EnsureCreatedAsync();
+                    return;
+                }
+
                 await dataContext.Database.MigrateAsync();
                 return;
             }
-            catch (SqlException) when (attempt < maxAttempts)
+            catch (DbException) when (attempt < maxAttempts)
             {
                 await Task.Delay(TimeSpan.FromSeconds(3));
             }
+        }
+
+        var finalProviderName = dataContext.Database.ProviderName ?? string.Empty;
+        if (finalProviderName.Contains("Npgsql", StringComparison.OrdinalIgnoreCase))
+        {
+            await dataContext.Database.EnsureCreatedAsync();
+            return;
         }
 
         await dataContext.Database.MigrateAsync();
