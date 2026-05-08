@@ -11,16 +11,19 @@ internal static class PostgresConnectionStringNormalizer
             return connectionString;
         }
 
-        var trimmed = connectionString.Trim();
+        var trimmed = StripWrappingQuotes(connectionString);
         if (!trimmed.StartsWith("postgres://", StringComparison.OrdinalIgnoreCase)
             && !trimmed.StartsWith("postgresql://", StringComparison.OrdinalIgnoreCase))
         {
-            return connectionString;
+            // Npgsql expects the standard keyword/value format (Host=...;Username=...;...).
+            // We'll still return the trimmed version to avoid issues when the entire value
+            // was accidentally wrapped in quotes by copy/paste or .env syntax.
+            return trimmed;
         }
 
         if (!Uri.TryCreate(trimmed, UriKind.Absolute, out var uri))
         {
-            return connectionString;
+            return trimmed;
         }
 
         var username = string.Empty;
@@ -78,5 +81,23 @@ internal static class PostgresConnectionStringNormalizer
 
         return builder.ConnectionString;
     }
-}
 
+    private static string StripWrappingQuotes(string value)
+    {
+        var trimmed = value.Trim();
+        while (trimmed.Length >= 2)
+        {
+            var first = trimmed[0];
+            var last = trimmed[^1];
+            if ((first == '"' && last == '"') || (first == '\'' && last == '\''))
+            {
+                trimmed = trimmed[1..^1].Trim();
+                continue;
+            }
+
+            break;
+        }
+
+        return trimmed;
+    }
+}
